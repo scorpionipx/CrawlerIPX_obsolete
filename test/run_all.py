@@ -1,6 +1,3 @@
-"""
-    Test function to execute all tests found within current directory
-"""
 import sys
 import xmlrunner
 
