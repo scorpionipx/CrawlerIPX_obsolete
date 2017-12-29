@@ -123,8 +123,8 @@ class Command:
 
     def __lt__(self, other_command):
         """
-            Method used to be able to sort Command type objects by their ID.
-        :param other_command: Command object to compare id with
+            Method used to be able to sort Command type objects by their name.
+        :param other_command: Command object to compare name with
         :return: bool True or False
         """
         return self.name < other_command.name
@@ -134,7 +134,7 @@ class Data:
     """
         Class used to handle data sent and received by IPX client and host.
     """
-    def __init__(self, data_id, name, in_code, description):
+    def __init__(self, data_id, name, description, in_code):
         """
             Constructor
         :param data_id: unique id of the data as positive integer
@@ -170,7 +170,7 @@ class Data:
         self.in_code = in_code
         self.description = description
 
-        logger.debug("Data " + str(self.in_code) + " initiated!")
+        logger.debug("IPX data " + str(self.in_code) + " initiated!")
 
     def get_id(self):
         """
@@ -213,6 +213,14 @@ class Data:
         :return: name
         """
         return str(self.name)
+
+    def __lt__(self, other_data):
+        """
+            Method used to be able to sort Data type objects by their name.
+        :param other_data: Data object to compare name with
+        :return: bool True or False
+        """
+        return self.name < other_data.name
 
 
 

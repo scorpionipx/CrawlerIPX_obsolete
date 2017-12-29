@@ -9,6 +9,7 @@ from .generic_utils import CLIENT_PASSWORD as GU_PWD
 
 from .host_utils import HostCommands
 from .client_utils import ClientCommands
+from .generic_data import DataIPX
 
 logger = logging.getLogger('ipx_logger')
 
@@ -43,8 +44,14 @@ class Client:
             self.username = username
             self.password = password
 
+            # initiate commands that can be sent by client
             self.commands = ClientCommands()
-            self.server_commands = HostCommands()
+
+            # initiate commands that can be sent by host
+            self.host_commands = HostCommands()
+
+            # initiate data that can be send or received
+            self.data = DataIPX()
 
             self.encoding = 'utf-8'
 
