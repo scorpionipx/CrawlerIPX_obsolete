@@ -112,8 +112,6 @@ class Host:
         :return: host_info - string
         """
 
-        # logger.debug("Called Host.get_info")
-
         name = self.get_name()
         ip = self.get_ip()
         port = self.get_port()
@@ -124,8 +122,6 @@ class Host:
         host_info += "IP: " + str(ip) + "\n"
         host_info += "Port: " + str(port) + "\n"
         host_info += "Encoding: " + str(encoding) + "\n"
-
-        logger.debug(host_info)
 
         return host_info
 
@@ -154,6 +150,12 @@ class Host:
             logger.warning(error)
             return error
 
+        # check if value provided for commands that mandatory requires one
+        if command.value_required and value is None:
+            error = "Unable to send command {}! Value required, but {} provided!".format(command, value)
+            logger.warning(error)
+            return error
+
         try:
             package = str(COMMAND_HEADER) + '\n' + str(command.id) + '\n' + str(value)
             package = self.string_to_bytes(package)
@@ -163,6 +165,23 @@ class Host:
             error = "Error occurred while sending command to client:\ncommand: " + str(command) + '\n' + str(err)
             logger.warning(error)
             return error
+
+    def get_host_command_by_id(self, command_id):
+        """
+            Get host's command matching id provided.
+        :param command_id: id of the command as integer
+        :return: host_command
+        """
+        logger.debug("Called Host.get_host_command_by_id")
+
+        host_command = None
+        for _host_command in self.commands.all_commands:
+            if _host_command.id == command_id:
+                host_command = _host_command
+                break
+
+        logger.debug("Host command id {} matched: {}".format(command_id, host_command))
+        return host_command
 
     def decode_response(self, client_response):
         """
@@ -284,12 +303,14 @@ class Host:
         :return: True if command is valid, False otherwise
         """
         command_is_valid = False
+        command_id = None
         for command in self.commands.all_commands:
             if str(user_command) == str(command.in_code):
                 command_is_valid = True
+                command_id = command.get_id()
                 break
 
-        return command_is_valid
+        return command_is_valid, command_id
 
     def decode_user_input(self, user_input):
         """
@@ -300,23 +321,96 @@ class Host:
         user_input = str(user_input)
         user_input = user_input.split()
         logger.info("Got user input: " + str(user_input))
-        action = str(user_input[0])
+        try:
+            user_action = str(user_input[0])
+        except Exception as err:
+            error = "Unable to read user's input! " + str(err)
+            logger.warning(error)
+            return
 
-        if str(action).upper() == 'send_command'.upper() or str(action).upper() == 'sc'.upper():
+        if str(user_action).upper() == 'send_command'.upper() or str(user_action).upper() == 'sc'.upper():
             logger.debug("send_command command initiated by user!")
-            user_command = str(user_input[1])
+
+            try:
+                user_command = str(user_input[1])
+            except Exception as err:
+                error = "Unable to read user's command! " + str(err)
+                logger.warning(error)
+                return
+
             logger.debug("command to be send: " + str(user_command))
             logger.debug("Evaluating command...")
-            command_is_valid = self.__host_command_name_is_valid__(user_command)
+            command_is_valid, command_id = self.__host_command_name_is_valid__(user_command)
             if command_is_valid:
                 logger.debug("Command is valid.")
+                logger.debug("Reading value...")
+                try:
+                    user_value = str(user_input[3])
+                except Exception as err:
+                    error = "No value provided! " + str(err)
+                    logger.warning(error)
+                    user_value = None
+
+                host_command = self.get_host_command_by_id(command_id)
+                self.send_command(host_command, user_value)
+                client_response = self.client.recv(BUFFER_SIZE)
+                logger.info(self.decode_response(client_response))
             else:
                 logger.warning("Invalid command to be sent: {}".format(user_command))
+                return
 
-        elif str(action).upper() == 'send_data'.upper() or str(action).upper() == 'sd'.upper():
+        elif str(user_action).upper() == 'send_data'.upper() or str(user_action).upper() == 'sd'.upper():
             logger.debug("send_data command initiated by user!")
             user_data = str(user_input[1])
             logger.debug("data to be send: " + str(user_data))
+
+        elif str(user_action).upper() == 'host_cmd'.upper() or str(user_action).upper() == 'hc'.upper():
+            logger.debug("host_cmd command initiated by user!")
+            try:
+                user_command = str(user_input[1])
+            except Exception as err:
+                error = "Unable to read user's host_cmd! " + str(err)
+                logger.warning(error)
+                return
+            self.execute_host_cmd(user_command)
+
+        else:
+            logger.debug("Unknown user action: {}".format(user_action))
+
+    def execute_host_cmd(self, host_cmd):
+        """
+            Executes host specific commands.
+        :param host_cmd: command to be executed
+        :return: None
+        """
+        host_cmd = str(host_cmd).upper()
+
+        if host_cmd == str('print_info').upper():
+            self.host_cmd_print_info()
+
+        elif host_cmd == str('connect_with_client').upper():
+            self.connect_with_client()
+
+        else:
+            logger.warning("Unknown host_cmd: {}.".format(host_cmd))
+
+    def terminate(self):
+        try:
+            self.socket.shutdown(py_socket.SHUT_RDWR)
+        except Exception as err:
+            error = "Error occurred while trying to shutdown host's socket: {}".format(err)
+            logger.warning(error)
+        self.socket.close()
+        self.socket = None
+        self.client_name = None
+        self.client = None
+
+    def host_cmd_print_info(self):
+        """
+            host_cmd specific command
+        :return: None
+        """
+        print(self.get_info())
 
     def run_user_input_mode(self):
         """
@@ -327,6 +421,11 @@ class Host:
         user_input_mode = True
         while user_input_mode:
             user_input = input()
+            if str(user_input) == 'exit' or str(user_input) == 'close':
+                logger.info("User input mode closed!")
+                user_input_mode = False
+                self.terminate()
+                break
             self.decode_user_input(user_input)
 
 

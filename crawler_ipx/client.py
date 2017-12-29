@@ -73,6 +73,63 @@ class Client:
             encoding = self.encoding
         return bytes(_string, encoding)
 
+    def decode_server_response(self, server_response):
+        """
+            Method decodes client's response.
+        :param server_response: bytes received from client
+        :return:
+        """
+        response = {"Type": None, "ID": None, "Content": None, "Valid": True, "Error": None}
+
+        server_response = server_response.decode(self.encoding)
+        server_response = server_response.split()
+        response["Type"] = server_response[0]
+        response["ID"] = server_response[1]
+
+        # extract content - needed if content contains new line character
+        content = ''
+        for index, item in enumerate(server_response):
+            if index > 1:
+                content += '\n'
+                content += str(item)
+
+        response["Content"] = content
+
+        # validate content
+        if response["Valid"]:
+            if (response["Type"]) == str(COMMAND_HEADER) or str(response["Type"]) == str(DATA_HEADER):
+                response["Valid"] = True
+            else:
+                response["Valid"] = False
+                if response["Error"] is None:
+                    response["Error"] = "Invalid header ID!"
+                else:
+                    response["Error"] += '\n'
+                    response["Error"] += "Invalid header ID!"
+
+        if response["Valid"]:
+            id_is_valid = False
+            for command in self.host_commands.all_commands:
+                if str(command.id) == str(response["ID"]):
+                    id_is_valid = True
+                    break
+
+            if id_is_valid:
+                response["Valid"] = True
+            else:
+                response["Valid"] = False
+                if response["Error"] is None:
+                    response["Error"] = "Invalid data/command ID!"
+                else:
+                    response["Error"] += '\n'
+                    response["Error"] += "Invalid data/command ID!"
+
+        # test_print("\nType: " + str(response["Type"]) + "\nID: " + str(response["ID"]) + "\nContent:" +
+        #            str(response["Content"]) + "\nValid: " + str(response["Valid"]) + "\nErrors: " +
+        #            str(response["Error"]))
+
+        return response
+
     def connect_to_host(self):
         """
             Method establishes connection to the host.
@@ -86,20 +143,20 @@ class Client:
 
         self.send_credentials()
 
-    def send_data(self, data_id, data):
+    def send_data(self, data, value):
         """
             Method sends a data to the host.
-        :param data_id: specifies the data type that is sent to server.
-        :param data: actual data
+        :param data: IPX data type
+        :param value: data's content
         :return: boolean True if ok, error occurred as string if not ok.
         """
         try:
-            data = str(DATA_HEADER) + '\n' + str(data_id) + '\n' + str(data)
-            data = self.string_to_bytes(data)
-            self.socket.send(data)
+            package = str(DATA_HEADER) + '\n' + str(data.id) + '\n' + str(value)
+            package = self.string_to_bytes(package)
+            self.socket.send(package)
             return True
         except Exception as err:
-            error = "Error occurred while sending data to client:\ndata_id: " + str(data_id) + '\ndata: ' + str(data)\
+            error = "Error occurred while sending data to client:\ndata: " + str(data) + '\nvalue: ' + str(value)\
                     + '\n' + str(err)
             logger.warning(error)
             return error
@@ -110,9 +167,68 @@ class Client:
         :return: None
         """
         logger.info("Sending credentials...")
-        data = 'u:' + str(self.username) + '\np:' + str(self.password)
-        self.send_data(1, data)
+        value = 'u:' + str(self.username) + '\np:' + str(self.password)
+        self.send_data(self.data.credentials, value)
 
+    def __get_host_command_by_id__(self, command_id):
+        """
+            Get host's Command type matching command_id.
+        :param command_id: host's command id as integer
+        """
+        logger.debug("Client.__get_host_command_by_id__ called.")
+
+        host_command = None
+        for command in self.host_commands.all_commands:
+            if command.id == command_id:
+                host_command = command
+                break
+
+        logger.debug("Provided command_id {} matched command: {}".format(command_id, command))
+        return host_command
+
+    def run_in_slave_mode(self):
+        """
+            Client continuously listens to host's command.
+        :return: None
+        """
+        logger.info("Slave mode enabled! Waiting for host's commands...")
+        slave_mode = True
+        while slave_mode:
+            server_command = self.socket.recv(BUFFER_SIZE)
+            server_command = self.decode_server_response(server_command)
+
+            logger.debug("Received package from host: {}".format(server_command))
+
+            if server_command["Type"] == str(COMMAND_HEADER):
+                host_command = self.__get_host_command_by_id__(int(server_command["ID"]))
+                if host_command is not None:
+                    logger.debug("Execute command {}".format(host_command))
+                    self.run_slave_command(host_command)
+                else:
+                    logger.warning("Invalid command provided!")
+
+    def start_video_streaming(self):
+        """
+            TO DO
+        :return:
+        """
+        pass
+
+    def run_slave_command(self, host_command):
+        """
+            Run command received from host.
+        :param host_command: command type object
+        :return: None
+        """
+        if host_command.id == self.host_commands.ask_client_for_credentials.id:
+            self.send_credentials()
+
+        elif host_command.id == self.host_commands.start_video_streaming.id:
+            self.start_video_streaming()
+            self.send_data(self.data.command_accepted, True)
+
+        else:
+            logger.warning("Unknown command provided! {}".format(host_command))
 
 
 

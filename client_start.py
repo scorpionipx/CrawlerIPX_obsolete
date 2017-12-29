@@ -9,4 +9,5 @@ logger.info("Running client from bat script\n\n")
 
 ipx_client = Client(test_host)
 ipx_client.connect_to_host()
+ipx_client.run_in_slave_mode()
 

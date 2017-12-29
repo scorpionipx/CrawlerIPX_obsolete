@@ -23,6 +23,13 @@ class DataIPX:
             COMMAND_ACCEPTED_DATA_IN_CODE,
         )
 
+        self.credentials = Data(
+            CREDENTIALS_DATA_ID,
+            CREDENTIALS_DATA_NAME,
+            CREDENTIALS_DATA_DESCRIPTION,
+            CREDENTIALS_DATA_IN_CODE,
+        )
+
         logger.debug("IPX data initiated!")
 
 
