@@ -1,2 +1,2 @@
 # CrawlerIPX
-Control a RC car via Ethernet using host-client UDP protocol.
+Control a RC car via Ethernet using host-client TCP/IP protocol.
