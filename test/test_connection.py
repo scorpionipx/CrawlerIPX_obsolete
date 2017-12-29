@@ -14,8 +14,6 @@ class TestConnection(unittest.TestCase):
         ipx_host = Host()
         self.assertIsInstance(ipx_host, Host)
 
-        ipx_host.connect_with_client()
-
         host_name = ipx_host.get_name()
 
         ipx_client = Client(host_name)
