@@ -15,7 +15,7 @@ logger_file_path = dir_path = os.path.dirname(os.path.dirname(os.path.realpath(_
 
 # create file logger handler
 logger_file_handler = logging.FileHandler(logger_file_path)
-logger_file_handler.setLevel(logging.INFO)
+logger_file_handler.setLevel(logging.DEBUG)
 
 logger_file_handler_formatter = logging.Formatter("%(asctime)s - %(levelname)s: %(message)s",
                                                   datefmt='%d %b %Y %H:%M:%S')
