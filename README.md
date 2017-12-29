@@ -18,7 +18,7 @@ There are some setting needed to be configured on first run:
 <li> sudo branch=next rpi-update </li>
 <li> [reboot] </li>
 </ul>
-2. To enable video streaming on rpi
+2. To enable video streaming on rpi (tutorial from https://pimylifeup.com/raspberry-pi-webcam-server/)
 <br><br>
 <p>To begin, first update the Raspberry Pi so you&#8217;re running on the latest version.</p><pre><code>sudo apt-get update
 sudo apt-get upgrade</code></pre><p>Depending on the version of Raspbian you&#8217;re using you will need to do a few different steps.</p><h3>Raspbian Jessie</h3><p><strong class="step_numbering">1.</strong> We start by removing libraries that may conflict with the newer packages. These may or may not already exist on your copy of Raspbian.</p><pre><code>sudo apt-get remove libavcodec-extra-56 libavformat56 libavresample2 libavutil54</code></pre><p><strong class="step_numbering">2.</strong> Download and install the following packages by inserting the following commands into the terminal.</p><pre><code>wget https://github.com/ccrisan/motioneye/wiki/precompiled/ffmpeg_3.1.1-1_armhf.deb
