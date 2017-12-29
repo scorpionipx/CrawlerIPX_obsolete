@@ -277,4 +277,60 @@ class Host:
                 self.client.close()
                 self.client = None
 
+    def __host_command_name_is_valid__(self, user_command):
+        """
+            Check if a command is valid.
+        :param user_command: command's name to be sent
+        :return: True if command is valid, False otherwise
+        """
+        command_is_valid = False
+        for command in self.commands.all_commands:
+            if str(user_command) == str(command.in_code):
+                command_is_valid = True
+                break
+
+        return command_is_valid
+
+    def decode_user_input(self, user_input):
+        """
+            Method decode user's input and takes proper action.
+        :param user_input: user's input
+        :return: None
+        """
+        user_input = str(user_input)
+        user_input = user_input.split()
+        logger.info("Got user input: " + str(user_input))
+        action = str(user_input[0])
+
+        if str(action).upper() == 'send_command'.upper() or str(action).upper() == 'sc'.upper():
+            logger.debug("send_command command initiated by user!")
+            user_command = str(user_input[1])
+            logger.debug("command to be send: " + str(user_command))
+            logger.debug("Evaluating command...")
+            command_is_valid = self.__host_command_name_is_valid__(user_command)
+            if command_is_valid:
+                logger.debug("Command is valid.")
+            else:
+                logger.warning("Invalid command to be sent: {}".format(user_command))
+
+        elif str(action).upper() == 'send_data'.upper() or str(action).upper() == 'sd'.upper():
+            logger.debug("send_data command initiated by user!")
+            user_data = str(user_input[1])
+            logger.debug("data to be send: " + str(user_data))
+
+    def run_user_input_mode(self):
+        """
+            Host runs in user input mode.
+        User input is awaited to take action.
+        """
+        logger.info("User input mode enabled! Waiting for user input...")
+        user_input_mode = True
+        while user_input_mode:
+            user_input = input()
+            self.decode_user_input(user_input)
+
+
+
+
+
 

@@ -7,4 +7,5 @@ logger.info("Running host from bat script\n\n")
 
 ipx_host = Host()
 logger.info(ipx_host.get_info())
+ipx_host.run_user_input_mode()
 ipx_host.connect_with_client()
