@@ -26,6 +26,18 @@ START_VIDEO_STREAMING_CMD_DESCRIPTION += "Value required: " + str(START_VIDEO_ST
 START_VIDEO_STREAMING_CMD_DESCRIPTION += "In code usage: " + str(START_VIDEO_STREAMING_CMD_IN_CODE) + "\n"
 # =====================================================================================================================
 
+# STOP VIDEO STREAMING COMMAND
+# =====================================================================================================================
+STOP_VIDEO_STREAMING_CMD_ID = 3
+STOP_VIDEO_STREAMING_CMD_NAME = "Start video streaming"
+STOP_VIDEO_STREAMING_CMD_IN_CODE = "stop_video_streaming"
+STOP_VIDEO_STREAMING_CMD_VR = False
+STOP_VIDEO_STREAMING_CMD_DESCRIPTION = STOP_VIDEO_STREAMING_CMD_NAME
+STOP_VIDEO_STREAMING_CMD_DESCRIPTION += " command asks client to stop video streaming." + "\n"
+STOP_VIDEO_STREAMING_CMD_DESCRIPTION += "ID: " + str(STOP_VIDEO_STREAMING_CMD_ID) + "\n"
+STOP_VIDEO_STREAMING_CMD_DESCRIPTION += "Value required: " + str(STOP_VIDEO_STREAMING_CMD_VR) + "\n"
+STOP_VIDEO_STREAMING_CMD_DESCRIPTION += "In code usage: " + str(STOP_VIDEO_STREAMING_CMD_IN_CODE) + "\n"
+# =====================================================================================================================
 
 
 

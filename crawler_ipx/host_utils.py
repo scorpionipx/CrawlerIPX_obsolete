@@ -33,10 +33,19 @@ class HostCommands:
             START_VIDEO_STREAMING_CMD_VR,
         )
 
+        self.stop_video_streaming = Command(
+            STOP_VIDEO_STREAMING_CMD_ID,
+            STOP_VIDEO_STREAMING_CMD_NAME,
+            STOP_VIDEO_STREAMING_CMD_DESCRIPTION,
+            STOP_VIDEO_STREAMING_CMD_IN_CODE,
+            STOP_VIDEO_STREAMING_CMD_VR,
+        )
+
         self.all_commands = sorted(
             [
                 self.ask_client_for_credentials,
                 self.start_video_streaming,
+                self.stop_video_streaming,
             ]
         )
 

@@ -214,6 +214,13 @@ class Client:
         """
         pass
 
+    def stop_video_streaming(self):
+        """
+            TO DO
+        :return:
+        """
+        pass
+
     def run_slave_command(self, host_command):
         """
             Run command received from host.
@@ -225,6 +232,10 @@ class Client:
 
         elif host_command.id == self.host_commands.start_video_streaming.id:
             self.start_video_streaming()
+            self.send_data(self.data.command_accepted, True)
+
+        elif host_command.id == self.host_commands.stop_video_streaming.id:
+            self.stop_video_streaming()
             self.send_data(self.data.command_accepted, True)
 
         else:
