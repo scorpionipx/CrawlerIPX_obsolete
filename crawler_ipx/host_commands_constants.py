@@ -29,7 +29,7 @@ START_VIDEO_STREAMING_CMD_DESCRIPTION += "In code usage: " + str(START_VIDEO_STR
 # STOP VIDEO STREAMING COMMAND
 # =====================================================================================================================
 STOP_VIDEO_STREAMING_CMD_ID = 3
-STOP_VIDEO_STREAMING_CMD_NAME = "Start video streaming"
+STOP_VIDEO_STREAMING_CMD_NAME = "Stop video streaming"
 STOP_VIDEO_STREAMING_CMD_IN_CODE = "stop_video_streaming"
 STOP_VIDEO_STREAMING_CMD_VR = False
 STOP_VIDEO_STREAMING_CMD_DESCRIPTION = STOP_VIDEO_STREAMING_CMD_NAME
